@@ -75,19 +75,20 @@ def UserLogin(request, username='', password=''):
 
         else:
             password = md5(password).hexdigest()
-            user = User.objects(username=username)
-            if not user:  #if the list is empty
+            user_exist = User.objects(username=username)
+            if not user_exist:  #if the list is empty
                 returnmsg = 'LOG ERR'
             else:
-                if user.password == password:
-                    returnmsg = 'LOG OK'
-                    #add session information
-                    user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=True))
-                    user.save()
-                else:
-                    returnmsg = 'LOG ERR'
-                    user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=False))
-                    user.save()
+                for user in User.objects(username=username):
+                    if user.password == password:
+                        returnmsg = 'LOG OK'
+                        #add session information
+                        user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=True))
+                        user.save()
+                    else:
+                        returnmsg = 'LOG ERR'
+                        user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=False))
+                        user.save()
     else:
         returnmsg = 'USR EPT'
 
