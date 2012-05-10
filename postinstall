@@ -1,0 +1,4 @@
+#!/bin/sh
+python waitfordb.py
+python ./manage.py syncdb --noinput
+python ./mkadmin.py
