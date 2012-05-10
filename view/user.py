@@ -8,8 +8,6 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 from database.user import *
 
-"""@package user
-"""
 def UserRegister(request, username='', password=''):
     """Register Function.
 
@@ -65,7 +63,7 @@ def UserLogin(request, username='', password=''):
           USR EPT:  Username or password is empty
     """
 
-    #returnmsg = 'LOG UNKNOWN'
+    returnmsg = 'LOG UNKNOWN'
 
     if request.method == 'POST':
         username = request.POST.get('username','')
@@ -77,20 +75,19 @@ def UserLogin(request, username='', password=''):
 
         else:
             password = md5(password).hexdigest()
-            user_exist = User.objects(username=username)
-            if not user_exist:  #if the list is empty
+            user = User.objects(username=username)
+            if not user:  #if the list is empty
                 returnmsg = 'LOG ERR'
             else:
-                for user in User.objects(username=username):
-                    if user.password == password:
-                        returnmsg = 'LOG OK'
-                        #add session information
-                        user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=True))
-                        user.save()
-                    else:
-                        returnmsg = 'LOG ERR'
-                        user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=False))
-                        user.save()
+                if user.password == password:
+                    returnmsg = 'LOG OK'
+                    #add session information
+                    user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=True))
+                    user.save()
+                else:
+                    returnmsg = 'LOG ERR'
+                    user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=False))
+                    user.save()
     else:
         returnmsg = 'USR EPT'
 
