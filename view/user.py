@@ -175,7 +175,8 @@ def UserLogCheck(request):
     """Output login logs for user in xml
 
     """
-    user = User.objects(username=request.session['username']).first()
+    username = Login.objects(session=request.session.session_key).first()
+    user = User.objects(username=username.username).first()
 
     xmlogs = Element("logs")
 
