@@ -2,11 +2,13 @@ __author__ = 'bxshi'
 from hashlib import md5
 from datetime import datetime
 from django.http import HttpResponse
+from django.http import HttpRequest
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 from database.user import *
+from database.login import *
 
 def UserRegister(request, username='', password=''):
     """Register Function.
@@ -33,7 +35,7 @@ def UserRegister(request, username='', password=''):
             password = md5(password).hexdigest()
             #check username exists
             check = User.objects(username=username).count()
-            if check == 0:
+            if not check:
 
                 rng = Random.new().read
                 RSAkey = RSA.generate(1024, rng)
@@ -82,7 +84,14 @@ def UserLogin(request, username='', password=''):
                 for user in User.objects(username=username):
                     if user.password == password:
                         returnmsg = 'LOG OK'
-                        #add session information
+
+                        #add session information(just a dumb, try to make sessionid appear)
+                        request.session['sid'] = md5(username).hexdigest()
+                        login_exist = Login.objects(username=username)
+                        if login_exist:
+                            login_exist.delete()
+                        login = Login(session=request.session.session_key, username=username)
+                        login.save()
                         user.log.append(UserLog(time=datetime.now(), ip=request.META['REMOTE_ADDR'], login=True))
                         user.save()
                     else:
@@ -103,16 +112,29 @@ def UserLogout(request):
             USR NOTLOG: Not login
             USR LOGOUT: Logout
     """
-    try:
-        del request.session['username']
-    except KeyError:
-        return HttpResponse('USR NOTLOG')
+    returnmsg = "USR UNKNOWN"
+    if request.session.session_key is None:
+        returnmsg = "USR NOTLOG"
+    else:
+        login_exist = Login.objects(session=request.session.session_key)
+        if not login_exist:  #if the list is empty
+            returnmsg = 'USR NOTLOG'
 
-    return HttpResponse('USR LOGOUT')
+        else:
+            login_exist.delete()
+            returnmsg = "USR LOGOUT"
+            for key in request.session.keys():
+                try:
+                    del request.session[key]
+                except KeyError:
+                    returnmsg = 'USR NOTLOG'
+
+    return HttpResponse(returnmsg)
 
 def UserGetPublicKey(request):
 
-    keypair = User.objects(username=request.session['username']).first()
+    username = Login.objects(session=request.session.session_key).first()
+    keypair = User.objects(username=username.username).first()
 
     pub = keypair.publickey
 
@@ -126,8 +148,8 @@ def UserGetPrivateKey(request):
     """Send privatekey to client, after first call of this function, server will delete private key from database
 
     """
-
-    keypair = User.objects(username=request.session['username']).first()
+    username = Login.objects(session=request.session.session_key).first()
+    keypair = User.objects(username=username.username).first()
 
     pri = keypair.privatekey
 
@@ -143,7 +165,8 @@ def UserLoginCheck(view):
 
     """
     def newview(request, *args, **kwargs):
-        if 'username' not in request.session:
+        login_exist = Login.objects(session=request.session.session_key)
+        if not login_exist:  #if the list is empty
             return HttpResponse("USR NOTLOG")
         return view(request, *args, **kwargs)
     return newview
