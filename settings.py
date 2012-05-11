@@ -31,7 +31,6 @@ ENGINE="django_mongodb_engine"
 #you should check your own settings by `dotcloud info your_app_name.database_name to get these informations`
 mongoengine.connect('admin', host='ptltest-bxshi-db-0.dotcloud.com', port=26765 , username='root', password=env['DOTCLOUD_DB_MONGODB_PASSWORD'])
 
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
