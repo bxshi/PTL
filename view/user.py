@@ -74,7 +74,6 @@ def UserLogin(request, username='', password=''):
     if username != '' and password != '':
         if len(username) > 20:
             returnmsg = 'USR LEN'
-
         else:
             password = md5(password).hexdigest()
             user_exist = User.objects(username=username)
@@ -171,7 +170,7 @@ def UserLoginCheck(view):
         return view(request, *args, **kwargs)
     return newview
 
-def UserLogCheck(request):
+def UserLogCheck(request, loglimit='25'):
     """Output login logs for user in xml
 
     """
@@ -180,6 +179,7 @@ def UserLogCheck(request):
 
     xmlogs = Element("logs")
 
+    i=1
     for log in reversed(user.log):
 
         xmlog = Element('log')
@@ -193,5 +193,9 @@ def UserLogCheck(request):
         SubElement(xmlog, "login").text = str(log.login)
 
         xmlogs.append(xmlog)
+
+        i+=1
+        if i > int(loglimit) :
+            break
 
     return HttpResponse(tostring(xmlogs,encoding='UTF-8'),content_type='text/xml')
