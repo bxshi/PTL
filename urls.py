@@ -22,6 +22,7 @@ urlpatterns = patterns('',
     (r'^login/getpublickey/$', UserLoginCheck(UserGetPublicKey)),
     (r'^login/getprivatekey/$', UserLoginCheck(UserGetPrivateKey)),
     (r'^logcheck/$', UserLoginCheck(UserLogCheck)),
+    (r'^logcheck/(?P<loglimit>[0-9]+)/$', UserLoginCheck(UserLogCheck)),
 
     # Examples:
     # url(r'^$', 'ptl.views.home', name='home'),
