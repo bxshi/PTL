@@ -169,19 +169,23 @@ def QuizInsert(request, xmlstr=''):
         #fill quiz info
         if info is not None:
             try:
-                quiz.info.append(QuizInfo(type='type', description=info['type']))
+                if info['type'] is not None:
+                    quiz.info.append(QuizInfo(type='type', description=info['type']))
             except KeyError:
                 pass
             try:
-                quiz.info.append(QuizInfo(type='choose', description=info['choose']))
+                if info['choose'] is not None:
+                    quiz.info.append(QuizInfo(type='choose', description=info['choose']))
             except KeyError:
                 pass
             try:
-                quiz.info.append(QuizInfo(type='order', description=info['order']))
+                if info['order'] is not None:
+                    quiz.info.append(QuizInfo(type='order', description=info['order']))
             except KeyError:
                 pass
             try:
-                quiz.info.append(QuizInfo(type='selection number', description=info['selection number']))
+                if info['selection number'] is not None:
+                    quiz.info.append(QuizInfo(type='selection number', description=info['selection number']))
             except KeyError:
                 pass
 
