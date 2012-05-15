@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<logs>
+    <log>
+        <year>2012</year>
+        <month>5</month>
+        <day>15</day>
+        <hour>16</hour>
+        <minute>28</minute>
+        <second>34</second>
+        <ip>10.127.77.84</ip>
+        <login>True</login>
+    </log>
+    <log>
+        <year>2012</year>
+        <month>5</month>
+        <day>15</day>
+        <hour>12</hour>
+        <minute>59</minute>
+        <second>56</second>
+        <ip>10.79.37.178</ip>
+        <login>True</login>
+    </log>
+</logs>
