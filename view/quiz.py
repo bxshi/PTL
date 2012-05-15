@@ -7,6 +7,7 @@ from Crypto import Random
 from xml.etree.ElementTree import Element, SubElement, tostring, fromstring
 
 from database.quiz import *
+from database.login import Login
 
 class QuizParser():
 
@@ -168,7 +169,8 @@ def QuizInsert(request, xmlstr=''):
     else:
         quizxml = fromstring(xmlstr)
         qp = QuizParser(quizxml.find('quiz'))
-        quiz = Quiz(creator=qp.GetCreator(), description=qp.GetDescription(), manualdifficulty=int(qp.GetManualDifficulty()), autodifficulty=qp.GetAutoDifficulty())
+        username = Login.objects(session=request.session.session_key).first()
+        quiz = Quiz(creator=username.username, description=qp.GetDescription(), manualdifficulty=int(qp.GetManualDifficulty()), autodifficulty=qp.GetAutoDifficulty())
         info = qp.GetInfoDict()
 
         #fill quiz info
@@ -238,6 +240,81 @@ def QuizInsert(request, xmlstr=''):
         returnmsg = 'QUIZ ADD OK id='+ quiz.id
     return HttpResponse(returnmsg)
 
+def QuizGet(request, elementlimit=-1):
+
+    if request.method == POST:
+        elementlimit = int(request.POST.get('elementlimit', ''))
+
+    username = Login.objects(session=request.session.session_key).first()
+
+    xml = Element("root")
+    i = 0
+    for quiz in Quiz:
+        xmlquiz = Element('quiz')
+        SubElement(xmlquiz, 'creator').text = str(quiz.creator)
+
+        quiz_info = Element('quiz_info')
+        try:
+            SubElement(quiz_info, 'type').text = str(quiz.info['type'])
+        except KeyError:
+            pass
+        try:
+            SubElement(quiz_info, 'choose').text = str(quiz.info['choose'])
+        except KeyError:
+            pass
+        try:
+            SubElement(quiz_info, 'order').text = str(quiz.info['order'])
+        except KeyError:
+            pass
+        try:
+            SubElement(quiz_info, 'order').text = str(quiz.info['selection_number'])
+        except KeyError:
+            pass
+        xmlquiz.append(quiz_info)
+
+        SubElement('xmlquiz', 'description').text = str(quiz.description)
+
+        attachments = Element('attachments')
+        while len(quiz.attachment) > 0:
+            attach = quiz.attachment.pop(0)
+            xmlatt = Element("attachment")
+            SubElement(xmlatt, "description").text = str(attach.description)
+            SubElement(xmlatt, "file").text = str(attach.file)
+            attachments.append(xmlatt)
+        xmlquiz.append(attachments)
+
+        correct_answer = Element('correct_answer')
+        while len(quiz.correctanswer) > 0:
+            answer = quiz.correctanswer.pop(0)
+            xmlans = Element('answer')
+            SubElement(xmlans, 'string').text = str(answer.answer)
+            SubElement(xmlans, 'attach').text = str(answer.attach)
+        xmlquiz.append(correct_answer)
+
+        wrong_answer = Element('wrong_answer')
+        while len(quiz.wronganswer) > 0:
+            answer = quiz.wronganswer.pop(0)
+            xmlans = Element('answer')
+            SubElement(xmlans, 'string').text = str(answer.answer)
+            SubElement(xmlans, 'attach').text = str(answer.attach)
+        xmlquiz.append(wrong_answer)
+
+        SubElement(xmlquiz, 'manual_difficulty').text = str(quiz.manualdifficulty)
+        SubElement(xmlquiz, 'auto_difficulty').text = str(quiz.autodifficulty)
+
+        tags = Element('tags')
+        while len(quiz.tag) > 0:
+            tag = quiz.tag.pop(0)
+            SubElement(tags, 'tag').text = str(tag)
+        xmlquiz.append(tags)
+
+        xml.append(xmlquiz)
+
+        i += 1
+        if i != -1 and i >= elementlimit:
+            break
+
+    return HttpResponse(tostring(xml,encoding='UTF-8'),content_type='text/xml')
 def main():
     #f = open('quiz.xml')
     qp = QuizParser(fromstring(f.read()).find('quiz'))
