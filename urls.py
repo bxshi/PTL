@@ -13,6 +13,7 @@ from view.user import UserLoginCheck
 from view.user import UserLogCheck
 
 from view.quiz import QuizInsert
+from view.quiz import QuizGet
 
 urlpatterns = patterns('',
 
@@ -34,6 +35,9 @@ urlpatterns = patterns('',
     (r'^logcheck/(?P<loglimit>[0-9]+)/$', UserLoginCheck(UserLogCheck)),
 
     (r'^quiz/insert/$', UserLoginCheck(QuizInsert)),
+    (r'^quiz/edit/$', UserLoginCheck(QuizInsert)),
+    (r'^quiz/get/$', UserLoginCheck(QuizGet)),
+    (r'^quiz/get/(?P<elementlimit>[0-9]+)/$', UserLoginCheck(QuizGet)),
 
     # Examples:
     # url(r'^$', 'ptl.views.home', name='home'),
