@@ -2,7 +2,6 @@ __author__ = 'bxshi'
 from hashlib import md5
 from datetime import datetime
 from django.http import HttpResponse
-from django.http import HttpRequest
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from xml.etree.ElementTree import Element, SubElement, tostring
