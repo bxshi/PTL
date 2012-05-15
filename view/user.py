@@ -10,24 +10,32 @@ from database.user import *
 from database.login import *
 
 def UserRegister(request, username='', password=''):
+
     """Register Function.
 
      Args:
           request:  Default
+
           username: In URL or in POST, var name is username
+
           password: In URL or in POST, var name is password
+
      Return:
           USR LEN:  Username or password is too long
+
           REG OK:   Register ok
+
           USR DUP:  Already has that username in database
+
           USR EPT:  Username or password is empty
+
     """
 
     if request.method == 'POST':
         username = request.POST.get('username','')
         password = request.POST.get('password','')
 
-    if username != '' or password != '' :
+    if username != '' and password != '' :
         if len(username) > 20:
             returnmsg = 'USR LEN'
         else:
@@ -50,18 +58,25 @@ def UserRegister(request, username='', password=''):
     return HttpResponse(returnmsg)
 
 def UserLogin(request, username='', password=''):
+
     """Login Function.
 
     Args:
           request:  Default
+
           username: In URL or in POST, var name is username
+
           password: In URL or in POST, var name is password
+
     Return:
           USR LEN:  Username or password is too long
+
           LOG OK:   Login ok
+
           LOG ERR:  Login error, do not show if username error or password
                     error for security reason
           USR EPT:  Username or password is empty
+
     """
 
     returnmsg = 'LOG UNKNOWN'
@@ -102,13 +117,16 @@ def UserLogin(request, username='', password=''):
     return HttpResponse(returnmsg)
 
 def UserLogout(request):
+
     """User logout function
 
     Args:
             request:    Default
     Returns:
             USR NOTLOG: Not login
+
             USR LOGOUT: Logout
+
     """
     returnmsg = "USR UNKNOWN"
     if request.session.session_key is None:
@@ -130,6 +148,12 @@ def UserLogout(request):
     return HttpResponse(returnmsg)
 
 def UserGetPublicKey(request):
+    """get pulickey
+
+        Returns:
+            RSA public key
+
+    """
 
     username = Login.objects(session=request.session.session_key).first()
     keypair = User.objects(username=username.username).first()
@@ -143,8 +167,11 @@ def UserGetPublicKey(request):
 
 
 def UserGetPrivateKey(request):
+
     """Send privatekey to client, after first call of this function, server will delete private key from database
 
+        Returns:
+            RSA private key
     """
     username = Login.objects(session=request.session.session_key).first()
     keypair = User.objects(username=username.username).first()
@@ -159,6 +186,7 @@ def UserGetPrivateKey(request):
         return HttpResponse('GET ERR')
 
 def UserLoginCheck(view):
+
     """used for redirect other pages, check login status first
 
     """
@@ -170,7 +198,16 @@ def UserLoginCheck(view):
     return newview
 
 def UserLogCheck(request, loglimit='25'):
+
     """Output login logs for user in xml
+
+        Args:
+            request:    Django default element
+
+            loglimit:   default 25, the max element number client wants retrieve
+
+        Returns:
+            XMl files
 
     """
     username = Login.objects(session=request.session.session_key).first()

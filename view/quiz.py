@@ -10,41 +10,109 @@ from database.quiz import *
 from database.login import Login
 
 class QuizParser():
+    """Parse quiz xml in <quiz></quiz>
 
+    """
     xml = None
     infolist = {}.fromkeys(('type', 'choose', 'order', 'selection number'))
 
     def __init__(self, quizxml=''):
+        """init it, load xml
+
+            Args:
+                quizxml:   XML Element, *not string*
+
+        """
         self.xml = quizxml
 
     def GetQuizInfo(self):
+        """get nested xml of quiz info
+
+            Returns:
+                XML Element
+
+        """
         return self.xml.find('quiz_info')
 
     def GetCreator(self):
+        """return creator of this quiz
+
+            Returns:
+                String
+
+        """
         return self.xml.find('creator').text
 
     def GetDescription(self):
+        """return description of this quiz
+
+            Returns:
+                String
+
+        """
         return self.xml.find('description').text
 
     def GetAttachments(self):
+        """return nested xml elements of attachments
+
+            Returns:
+                Element
+
+        """
         return self.xml.find('attachments')
 
     def GetCorrectAnswers(self):
+        """return nested xml elements of correct answer
+
+            Returns:
+                Element
+
+        """
         return self.xml.find('correct_answer')
 
     def GetWrongAnswers(self):
+        """return nested xml elements of wrong answer
+
+            Returns:
+                Element
+
+        """
         return self.xml.find('wrong_answer')
 
     def GetManualDifficulty(self):
+        """return manual difficulty of this quiz
+
+            Returns:
+                String, if use it as a int, use int()
+
+        """
         return self.xml.find('manual_difficulty').text
 
     def GetAutoDifficulty(self):
+        """return auto difficulty of this quiz
+
+            Returns:
+                Strings, if use it as a int, use int()
+
+        """
         return self.xml.find('auto_difficulty').text
 
     def GetTags(self):
+        """return nested xml elements of tags
+
+            Returns:
+                Element
+
+        """
         return self.xml.find('tags')
 
     def GetInfoType(self):
+        """return element of info -> type
+
+            Returns:
+                Element
+
+        """
         quizinfo = self.GetQuizInfo()
         if quizinfo is not None:
             return quizinfo.find('type')
@@ -52,6 +120,12 @@ class QuizParser():
             return None
 
     def GetInfoChoose(self):
+        """return element of info -> choose
+
+            Returns:
+                Element
+
+        """
         quizinfo = self.GetQuizInfo()
         if quizinfo is not None:
             return quizinfo.find('choose')
@@ -59,6 +133,12 @@ class QuizParser():
             return None
 
     def GetInfoOrder(self):
+        """return element of info -> order
+
+            Returns:
+                Element
+
+        """
         quizinfo = self.GetQuizInfo()
         if quizinfo is not None:
             return quizinfo.find('order')
@@ -66,6 +146,12 @@ class QuizParser():
             return None
 
     def GetSelectionNumber(self):
+        """return element of info ->selection number
+
+            Returns:
+                Element
+
+        """
         quizinfo = self.GetQuizInfo()
         if quizinfo is not None:
             return quizinfo.find('selection_number')
@@ -73,6 +159,18 @@ class QuizParser():
             return None
 
     def GetInfoDict(self):
+        """return a dict of info
+
+            Returns:
+                ['type']:    info -> type
+
+                ['choose']:  info -> choose
+
+                ['order']:   info -> order
+
+                ['selection number']:    info->selection_number
+
+        """
         quizinfo = self.GetQuizInfo()
         if quizinfo is None:
             return None
@@ -88,6 +186,16 @@ class QuizParser():
         return self.infolist
 
     def GetAttachmentList(self):
+        """return a list of attachments
+
+            Returns:
+                each list element contains:
+                    [description]:  attachment -> description
+
+                    [file]: attachment -> file
+
+
+        """
         attachments = self.GetAttachments()
         attachmentlist = list()
         if attachments is None:
@@ -105,6 +213,17 @@ class QuizParser():
         return attachmentlist
 
     def GetCorrectAnswerList(self):
+        """return correct answer list
+
+            Returns:
+                each element contains:
+                    [id]:   answer -> id
+
+                    [string]: answer -> string
+
+                    [attach]:   answer -> attach
+
+        """
         answers = self.GetCorrectAnswers()
         answerlist = list()
         if answers is None:
@@ -122,6 +241,17 @@ class QuizParser():
         return answerlist
 
     def GetWrongAnswerList(self):
+        """return wrong answer list
+
+            Returns:
+                each element contains:
+                    [id]:   answer -> id
+
+                    [string]: answer -> string
+
+                    [attach]:   answer -> attach
+
+        """
         answers = self.GetWrongAnswers()
         answerlist = list()
         if answers is None:
@@ -139,6 +269,12 @@ class QuizParser():
         return answerlist
 
     def GetTagList(self):
+        """return a list of tags
+
+            Returns:
+                list contains strings of each tag
+
+        """
         tags = self.GetTags()
         taglist = list()
 
@@ -157,6 +293,17 @@ class QuizParser():
         return taglist
 
 def QuizInsert(request, xmlstr=''):
+    """insert quiz into database
+
+        Args:
+            xmlstr: A xml string, the root label is root, and each quiz is enclosed by <quiz></quiz> label
+
+        Returns:
+            ERR UNKNOWN:    unknown error
+            XML EPT:        xml is empty
+            QUIZ ADD OK, id=%d  %d represent for id in database
+
+    """
     returnmsg = 'ERR UNKNOWN'
 
     if request.method is not 'POST':
@@ -241,6 +388,17 @@ def QuizInsert(request, xmlstr=''):
     return HttpResponse(returnmsg)
 
 def QuizGet(request, elementlimit=-1):
+    """get quizs
+
+        Args:
+            request:    Django default parameter
+
+            elementlimit:   -1 for unlimited, other positive number is the max element client wants to retrive
+
+        Returns:
+            XML file, the example could be seen in ../samples/quiz.xml
+
+    """
 
     if request.method == POST:
         elementlimit = int(request.POST.get('elementlimit', ''))
@@ -315,7 +473,11 @@ def QuizGet(request, elementlimit=-1):
             break
 
     return HttpResponse(tostring(xml,encoding='UTF-8'),content_type='text/xml')
+
 def main():
+    """test for QuizParser
+
+    """
     #f = open('quiz.xml')
     qp = QuizParser(fromstring(f.read()).find('quiz'))
 
