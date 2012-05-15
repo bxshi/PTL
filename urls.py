@@ -12,17 +12,28 @@ from view.user import UserGetPrivateKey
 from view.user import UserLoginCheck
 from view.user import UserLogCheck
 
+from view.quiz import QuizInsert
+
 urlpatterns = patterns('',
 
+    # register
     (r'^register/(?P<username>[^/]+)/(?P<password>[^/]+)/$', UserRegister),
     (r'^register/$', UserRegister),
+
+    # login/out
     (r'^login/(?P<username>[^/]+)/(?P<password>[^/]+)/$', UserLogin),
     (r'^login/$', UserLogin),
     (r'^logout/$', UserLogout),
+
+    # RSA keys
     (r'^login/getpublickey/$', UserLoginCheck(UserGetPublicKey)),
     (r'^login/getprivatekey/$', UserLoginCheck(UserGetPrivateKey)),
+
+    # login log
     (r'^logcheck/$', UserLoginCheck(UserLogCheck)),
     (r'^logcheck/(?P<loglimit>[0-9]+)/$', UserLoginCheck(UserLogCheck)),
+
+    (r'^quiz/insert/$', UserLoginCheck(QuizInsert)),
 
     # Examples:
     # url(r'^$', 'ptl.views.home', name='home'),
