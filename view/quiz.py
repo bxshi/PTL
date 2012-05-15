@@ -158,6 +158,11 @@ class QuizParser():
 def QuizInsert(request, xmlstr=''):
     returnmsg = 'ERR UNKNOWN'
 
+    if request.method is not 'POST':
+        return HttpResponse('NO GET METHOD')
+
+    xmlstr=request.POST.get('xml','')
+
     if xmlstr == '':
         returnmsg = "XML EPT"
     else:
@@ -229,8 +234,9 @@ def QuizInsert(request, xmlstr=''):
                     quiz.tag.append(tmptags)
                 except KeyError:
                     pass
-    returnmsg = 'QUIZ ADD OK'
-    return returnmsg
+        quiz.save()
+        returnmsg = 'QUIZ ADD OK id='+ quiz.id
+    return HttpResponse(returnmsg)
 
 def main():
     #f = open('quiz.xml')
