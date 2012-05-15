@@ -1,0 +1,54 @@
+<root>
+    <!-- each quiz is a element \<quiz\> -->
+    <quiz>
+
+        <!-- Optional, non-necessary -->
+        <creator>bxshi</creator>
+
+        <!-- informations about this quiz -->
+        <quiz_info>
+            <type> 单选多选填空判断简答其他 </type>
+            <choose> multiply / single </choose>
+            <order> yes / no </order>
+            <selection_number> number </selection_number>
+        </quiz_info>
+
+        <description> the text of this question </description>
+
+        <attachments>
+            <attachment>
+                <description>description of this file</description>
+                <file>the original string-like file</file>
+            </attachment>
+        </attachments>
+
+        <correct_answer>
+            <answer>
+                <!-- optional, if specific order==yes, then id label is necessary, or you could just ignore or fill 0 -->
+                <id>id</id>
+                <string>answer string</string>
+                <!-- optional, if your answer contain some pictures or other stuff, use this label -->
+                <attach>the original string-like file</attach>
+            </answer>
+        </correct_answer>
+
+        <wrong_answer>
+            <answer>
+                <id>id</id>
+                <string>answer string</string>
+                <attach>the original string-like file</attach>
+            </answer>
+        </wrong_answer>
+
+        <manual_difficulty>0 to 1, increased by 0.1</manual_difficulty>
+
+        <auto_difficulty>0 to 1, increased by 0.1</auto_difficulty>
+
+        <tags>
+            <tag>tag1</tag>
+            <tag>tag2</tag>
+            <tag>tag3</tag>
+        </tags>
+
+    </quiz>
+</root>
