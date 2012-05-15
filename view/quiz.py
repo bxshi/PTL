@@ -315,76 +315,78 @@ def QuizInsert(request, xmlstr=''):
         returnmsg = "XML EPT"
     else:
         quizxml = fromstring(xmlstr)
-        qp = QuizParser(quizxml.find('quiz'))
-        username = Login.objects(session=request.session.session_key).first()
-        quiz = Quiz(creator=username.username, description=qp.GetDescription(), manualdifficulty=int(qp.GetManualDifficulty()), autodifficulty=qp.GetAutoDifficulty())
-        info = qp.GetInfoDict()
+        quizall = quizxml.findall('quiz')
+        while len(quizxml) > 0:
+            qp = QuizParser(quizall.pop(0))
+            username = Login.objects(session=request.session.session_key).first()
+            quiz = Quiz(creator=username.username, description=qp.GetDescription(), manualdifficulty=int(qp.GetManualDifficulty()), autodifficulty=qp.GetAutoDifficulty())
+            info = qp.GetInfoDict()
 
-        #fill quiz info
-        if info is not None:
-            try:
-                if info['type'] is not None:
-                    quiz.info.append(QuizInfo(type='type', description=info['type']))
-            except KeyError:
-                pass
-            try:
-                if info['choose'] is not None:
-                    quiz.info.append(QuizInfo(type='choose', description=info['choose']))
-            except KeyError:
-                pass
-            try:
-                if info['order'] is not None:
-                    quiz.info.append(QuizInfo(type='order', description=info['order']))
-            except KeyError:
-                pass
-            try:
-                if info['selection number'] is not None:
-                    quiz.info.append(QuizInfo(type='selection number', description=info['selection number']))
-            except KeyError:
-                pass
-
-        #fill quiz attachments
-
-        attch = qp.GetAttachmentList()
-        if attch is not None:
-            while len(attch) > 0:
+            #fill quiz info
+            if info is not None:
                 try:
-                    tmpattch = attch.pop(0)
-                    quiz.attachment.append(QuizAttach(description=tmpattch['description'], file=tmpattch['file']))
+                    if info['type'] is not None:
+                        quiz.info.append(QuizInfo(type='type', description=info['type']))
+                except KeyError:
+                    pass
+                try:
+                    if info['choose'] is not None:
+                        quiz.info.append(QuizInfo(type='choose', description=info['choose']))
+                except KeyError:
+                    pass
+                try:
+                    if info['order'] is not None:
+                        quiz.info.append(QuizInfo(type='order', description=info['order']))
+                except KeyError:
+                    pass
+                try:
+                    if info['selection number'] is not None:
+                        quiz.info.append(QuizInfo(type='selection number', description=info['selection number']))
                 except KeyError:
                     pass
 
-        #fill answers
+            #fill quiz attachments
 
-        answer = qp.GetCorrectAnswerList()
-        if answer is not None:
-            while len(answer) > 0:
-                try:
-                    tmpanswer = answer.pop(0)
-                    quiz.correctanswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
-                except KeyError:
-                    pass
+            attch = qp.GetAttachmentList()
+            if attch is not None:
+                while len(attch) > 0:
+                    try:
+                        tmpattch = attch.pop(0)
+                        quiz.attachment.append(QuizAttach(description=tmpattch['description'], file=tmpattch['file']))
+                    except KeyError:
+                        pass
 
-        answer = qp.GetWrongAnswerList()
-        if answer is not None:
-             while len(answer) > 0:
-                try:
-                    tmpanswer = answer.pop(0)
-                    quiz.wronganswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
-                except KeyError:
-                    pass
+            #fill answers
 
-        #fill tags
-        tags = qp.GetTagList()
-        if tags is not None:
-            while len(tags) > 0:
-                try:
-                    tmptags = tags.pop(0)
-                    quiz.tag.append(tmptags)
-                except KeyError:
-                    pass
-        quiz.save()
-        returnmsg = 'QUIZ ADD OK id='+ quiz.id
+            answer = qp.GetCorrectAnswerList()
+            if answer is not None:
+                while len(answer) > 0:
+                    try:
+                        tmpanswer = answer.pop(0)
+                        quiz.correctanswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
+                    except KeyError:
+                        pass
+
+            answer = qp.GetWrongAnswerList()
+            if answer is not None:
+                 while len(answer) > 0:
+                    try:
+                        tmpanswer = answer.pop(0)
+                        quiz.wronganswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
+                    except KeyError:
+                        pass
+
+            #fill tags
+            tags = qp.GetTagList()
+            if tags is not None:
+                while len(tags) > 0:
+                    try:
+                        tmptags = tags.pop(0)
+                        quiz.tag.append(tmptags)
+                    except KeyError:
+                        pass
+            quiz.save()
+            returnmsg = 'QUIZ ADD OK id='+ quiz.id
     return HttpResponse(returnmsg)
 
 def QuizGet(request, elementlimit=-1):
