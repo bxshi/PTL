@@ -17,7 +17,11 @@ from view.quiz import QuizGet
 from view.quiz import QuizEdit
 from view.quiz import QuizDel
 
+from view.welcome import Welcome
+
 urlpatterns = patterns('',
+
+
 
     # register
     (r'^register/(?P<username>[^/]+)/(?P<password>[^/]+)/$', UserRegister),
@@ -43,6 +47,9 @@ urlpatterns = patterns('',
     (r'^quiz/get/(?P<qid>[^/]+)/$', UserLoginCheck(QuizGet)),
     (r'^quiz/get/(?P<elementlimit>[0-9]+)/$', UserLoginCheck(QuizGet)),
     (r'quiz/del/$', UserLoginCheck(QuizDel)),
+
+    #index
+    (r'', Welcome),
 
     # Examples:
     # url(r'^$', 'ptl.views.home', name='home'),
