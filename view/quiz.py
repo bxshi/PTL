@@ -390,7 +390,7 @@ def QuizInsert(request, xmlstr=''):
     return HttpResponse(returnmsg)
 
 def QuizGet(request, elementlimit=-1):
-    """get quizs
+    """get quiz
 
         Args:
             request:    Django default parameter
@@ -475,6 +475,21 @@ def QuizGet(request, elementlimit=-1):
             break
 
     return HttpResponse(tostring(xml,encoding='UTF-8'),content_type='text/xml')
+
+def QuizEdit(request, xmlstr='', qid=None):
+    returnmsg = None
+
+    if request.method == 'POST':
+        qid = request.POST.get('qid','')
+    else:
+        returnmsg = 'GET NOT SUPPORT'
+    if qid is None:
+        returnmsg = 'ID EPT'
+    else:
+        quiz = Quiz.objects(id=qid)
+        delete(quiz)
+        QuizInsert(request, xmlstr=xmlstr)
+    return HttpResponse(returnmsg)
 
 def main():
     """test for QuizParser
