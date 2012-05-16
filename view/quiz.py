@@ -476,6 +476,18 @@ def QuizGet(request, elementlimit=-1):
 
     return HttpResponse(tostring(xml,encoding='UTF-8'),content_type='text/xml')
 
+def QuizDel(request, qid=None):
+    returnmsg = None
+    if request.method == 'POST':
+        qid = request.POST.get('qid', '')
+
+    if qid is not None:
+        quiz = Quiz.objects(id=qid)
+        returnmsg = quiz.delete()
+    else:
+        returnmsg = "QID ERR"
+    return HttpResponse(returnmsg)
+
 def QuizEdit(request, xmlstr='', qid=None):
     returnmsg = None
 
@@ -487,7 +499,7 @@ def QuizEdit(request, xmlstr='', qid=None):
         returnmsg = 'ID EPT'
     else:
         quiz = Quiz.objects(id=qid)
-        delete(quiz)
+        quiz.delete()
         QuizInsert(request, xmlstr=xmlstr)
     return HttpResponse(returnmsg)
 
