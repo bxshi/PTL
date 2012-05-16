@@ -14,6 +14,7 @@ from view.user import UserLogCheck
 
 from view.quiz import QuizInsert
 from view.quiz import QuizGet
+from view.quiz import QuizEdit
 
 urlpatterns = patterns('',
 
@@ -34,8 +35,9 @@ urlpatterns = patterns('',
     (r'^logcheck/$', UserLoginCheck(UserLogCheck)),
     (r'^logcheck/(?P<loglimit>[0-9]+)/$', UserLoginCheck(UserLogCheck)),
 
+    #quiz
     (r'^quiz/insert/$', UserLoginCheck(QuizInsert)),
-    (r'^quiz/edit/$', UserLoginCheck(QuizInsert)),
+    (r'^quiz/edit/$', UserLoginCheck(QuizEdit)),
     (r'^quiz/get/$', UserLoginCheck(QuizGet)),
     (r'^quiz/get/(?P<elementlimit>[0-9]+)/$', UserLoginCheck(QuizGet)),
 
