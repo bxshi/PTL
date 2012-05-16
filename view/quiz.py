@@ -389,7 +389,7 @@ def QuizInsert(request, xmlstr=''):
             returnmsg = 'QUIZ ADD OK id='+ quiz.id
     return HttpResponse(returnmsg)
 
-def QuizGet(request, elementlimit=-1):
+def QuizGet(request, elementlimit=-1, qid=None):
     """get quiz
 
         Args:
@@ -409,7 +409,11 @@ def QuizGet(request, elementlimit=-1):
 
     xml = Element("root")
     i = 0
-    for quiz in Quiz:
+    if qid is not None:
+        quizset = Quiz.objects(id=qid, creator=username.username)
+    else:
+        quizset = Quiz.objects(creator=username.username)
+    for quiz in quizset:
         xmlquiz = Element('quiz')
         SubElement(xmlquiz, 'creator').text = str(quiz.creator)
 
