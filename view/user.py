@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from xml.etree.ElementTree import Element, SubElement, tostring
+from django.utils.encoding import smart_str, smart_unicode
 
 from database.user import *
 from database.login import *
@@ -82,8 +83,8 @@ def UserLogin(request, username='', password=''):
     returnmsg = 'LOG UNKNOWN'
 
     if request.method == 'POST':
-        username = request.POST.get('username','')
-        password = request.POST.get('password','')
+        username = smart_str(request.POST.get('username',''))
+        password = smart_str(request.POST.get('password',''))
 
     if username != '' and password != '':
         if len(username) > 20:
@@ -173,8 +174,8 @@ def UserGetPrivateKey(request):
         Returns:
             RSA private key
     """
-    username = Login.objects(session=request.session.session_key).first()
-    keypair = User.objects(username=username.username).first()
+    username = smart_str(Login.objects(session=request.session.session_key).first())
+    keypair = smart_str(User.objects(username=username.username).first())
 
     pri = keypair.privatekey
 
