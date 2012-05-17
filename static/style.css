@@ -1,0 +1,17 @@
+
+div{
+    -webkit-border-radius: 25px;
+    border-radius: 25px;
+    -webkit-box-shadow:  20px 20px 10px 0px rgba(0, 0, 0, 0.3);
+    box-shadow:  20px 20px 10px 0px rgba(0, 0, 0, 0.3);
+    margin-left: auto; margin-right: auto;
+    margin-top: 40px;
+    width:40%
+}
+
+div p{
+    text-shadow: 3px 3px 5px #d4d2d4;
+    filter: dropshadow(color=#d4d2d4, offx=3, offy=3);
+    text-align: center;
+    font-size: 15pt;
+}
