@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from Crypto.PublicKey import RSA
 from Crypto import Random
 from xml.etree.ElementTree import Element, SubElement, tostring, fromstring
+from django.utils.encoding import smart_str, smart_unicode, force_unicode
 
 from database.quiz import *
 from database.login import Login
@@ -205,7 +206,10 @@ class QuizParser():
         if not attachmentelementlist:
             while len(attachmentelementlist) > 0:
                 tmpelement = attachmentelementlist.pop(0)
-                attachmentdict = dict({'description' : tmpelement.find('description').text, 'file' : tmpelement.find('file').text})
+                if tmpelement.find('description') is not None:
+                    attachmentdict['description'] = templement.find('description').text
+                if tmpelement.find('file') is not None:
+                    attachmentdict['file']  =   templement.find('file').text
                 attachmentlist.append(attachmentdict)
         else:
             return None
@@ -233,8 +237,15 @@ class QuizParser():
         if  len(answerelementlist) > 0:
             while len(answerelementlist) > 0:
                 tmpanswer = answerelementlist.pop(0)
-                answerdict = dict({"id":tmpanswer.find('id').text,"string":tmpanswer.find('string').text,"attach":tmpanswer.find('attach').text})
-                answerlist.append(answerdict)
+                answerdict = dict()
+                if tmpanswer.find('id') is not None:
+                    answerdict['id'] = tmpanswer.find('id').text
+                if tmpanswer.find('string') is not None:
+                    answerdict['string'] = tmpanswer.find('string').text
+                if tmpanswer.find('attach') is not None:
+                    answerdict['attach']= tmpanswer.find('attach').text
+                if len(answerdict) > 0 :
+                    answerlist.append(answerdict)
         else:
             return None
 
@@ -261,8 +272,15 @@ class QuizParser():
         if  len(answerelementlist) > 0:
             while len(answerelementlist) > 0:
                 tmpanswer = answerelementlist.pop(0)
-                answerdict = dict({"id": tmpanswer.find('id').text,"string": tmpanswer.find('string').text,"attach": tmpanswer.find('attach').text})
-                answerlist.append(answerdict)
+                answerdict = dict()
+                if tmpanswer.find('id') is not None:
+                    answerdict['id'] = tmpanswer.find('id').text
+                if tmpanswer.find('string') is not None:
+                    answerdict['string'] = tmpanswer.find('string').text
+                if tmpanswer.find('attach') is not None:
+                    answerdict['attach']= tmpanswer.find('attach').text
+                if len(tmpanswer) > 0:
+                    answerlist.append(answerdict)
         else:
             return None
 
@@ -292,7 +310,7 @@ class QuizParser():
 
         return taglist
 
-def QuizInsert(request, xmlstr=''):
+def QuizInsert(request, xml=''):
     """insert quiz into database
 
         Args:
@@ -306,20 +324,25 @@ def QuizInsert(request, xmlstr=''):
     """
     returnmsg = 'ERR UNKNOWN'
 
-    if request.method is not 'POST':
+    if request.method == 'GET':
         return HttpResponse('NO GET METHOD')
+    if request.method == 'POST':
+        xml=smart_str(request.POST.get('xml',''))
 
-    xmlstr=request.POST.get('xml','')
-
-    if xmlstr == '':
+    if xml == '':
         returnmsg = "XML EPT"
     else:
-        quizxml = fromstring(xmlstr)
+        #try:
+        #xml = str(xml).decode()
+        #xml = str(xml).encode('UTF-8')
+        quizxml = fromstring(xml)
+        #except:
+        #    return HttpResponse("XML ERR")
         quizall = quizxml.findall('quiz')
-        while len(quizxml) > 0:
+        while len(quizall) > 0:
             qp = QuizParser(quizall.pop(0))
             username = Login.objects(session=request.session.session_key).first()
-            quiz = Quiz(creator=username.username, description=qp.GetDescription(), manualdifficulty=int(qp.GetManualDifficulty()), autodifficulty=qp.GetAutoDifficulty())
+            quiz = Quiz(creator=username.username, description=qp.GetDescription(), manualdifficulty=float(qp.GetManualDifficulty()))
             info = qp.GetInfoDict()
 
             #fill quiz info
@@ -341,7 +364,7 @@ def QuizInsert(request, xmlstr=''):
                     pass
                 try:
                     if info['selection number'] is not None:
-                        quiz.info.append(QuizInfo(type='selection number', description=info['selection number']))
+                        quiz.info.append(QuizInfo(type='selection_number', description=info['selection number']))
                 except KeyError:
                     pass
 
@@ -363,7 +386,7 @@ def QuizInsert(request, xmlstr=''):
                 while len(answer) > 0:
                     try:
                         tmpanswer = answer.pop(0)
-                        quiz.correctanswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
+                        quiz.correctanswer.append(QuizAnswer(answer=tmpanswer['string'],attach=tmpanswer['attach']))
                     except KeyError:
                         pass
 
@@ -372,7 +395,7 @@ def QuizInsert(request, xmlstr=''):
                  while len(answer) > 0:
                     try:
                         tmpanswer = answer.pop(0)
-                        quiz.wronganswer.append(answer=tmpanswer['string'],attach=tmpanswer['attach'])
+                        quiz.wronganswer.append(QuizAnswer(answer=tmpanswer['string'],attach=tmpanswer['attach']))
                     except KeyError:
                         pass
 
@@ -386,7 +409,7 @@ def QuizInsert(request, xmlstr=''):
                     except KeyError:
                         pass
             quiz.save()
-            returnmsg = 'QUIZ ADD OK id='+ quiz.id
+            returnmsg = 'QUIZ ADD OK id='+ str(quiz.id)
     return HttpResponse(returnmsg)
 
 def QuizGet(request, elementlimit=-1, qid=None):
@@ -402,7 +425,7 @@ def QuizGet(request, elementlimit=-1, qid=None):
 
     """
 
-    if request.method == POST:
+    if request.method == 'POST':
         elementlimit = int(request.POST.get('elementlimit', ''))
 
     username = Login.objects(session=request.session.session_key).first()
@@ -415,35 +438,26 @@ def QuizGet(request, elementlimit=-1, qid=None):
         quizset = Quiz.objects(creator=username.username)
     for quiz in quizset:
         xmlquiz = Element('quiz')
-        SubElement(xmlquiz, 'creator').text = str(quiz.creator)
+        SubElement(xmlquiz, 'creator').text = smart_unicode(quiz.creator)
 
         quiz_info = Element('quiz_info')
-        try:
-            SubElement(quiz_info, 'type').text = str(quiz.info['type'])
-        except KeyError:
-            pass
-        try:
-            SubElement(quiz_info, 'choose').text = str(quiz.info['choose'])
-        except KeyError:
-            pass
-        try:
-            SubElement(quiz_info, 'order').text = str(quiz.info['order'])
-        except KeyError:
-            pass
-        try:
-            SubElement(quiz_info, 'order').text = str(quiz.info['selection_number'])
-        except KeyError:
-            pass
+        while len(quiz.info) > 0:
+            quizinfo = quiz.info.pop(0)
+            try:
+                SubElement(quiz_info, smart_str(quizinfo.type)).text = smart_unicode(quizinfo.description)
+            except KeyError:
+                pass
+
         xmlquiz.append(quiz_info)
 
-        SubElement('xmlquiz', 'description').text = str(quiz.description)
+        SubElement(xmlquiz, 'description').text = smart_unicode(quiz.description)
 
         attachments = Element('attachments')
         while len(quiz.attachment) > 0:
             attach = quiz.attachment.pop(0)
             xmlatt = Element("attachment")
-            SubElement(xmlatt, "description").text = str(attach.description)
-            SubElement(xmlatt, "file").text = str(attach.file)
+            SubElement(xmlatt, "description").text = smart_unicode(attach.description)
+            SubElement(xmlatt, "file").text = smart_unicode(attach.file)
             attachments.append(xmlatt)
         xmlquiz.append(attachments)
 
@@ -451,25 +465,25 @@ def QuizGet(request, elementlimit=-1, qid=None):
         while len(quiz.correctanswer) > 0:
             answer = quiz.correctanswer.pop(0)
             xmlans = Element('answer')
-            SubElement(xmlans, 'string').text = str(answer.answer)
-            SubElement(xmlans, 'attach').text = str(answer.attach)
+            SubElement(xmlans, 'string').text = smart_unicode(answer.answer)
+            SubElement(xmlans, 'attach').text = smart_unicode(answer.attach)
         xmlquiz.append(correct_answer)
 
         wrong_answer = Element('wrong_answer')
         while len(quiz.wronganswer) > 0:
             answer = quiz.wronganswer.pop(0)
             xmlans = Element('answer')
-            SubElement(xmlans, 'string').text = str(answer.answer)
-            SubElement(xmlans, 'attach').text = str(answer.attach)
+            SubElement(xmlans, 'string').text = smart_unicode(answer.answer)
+            SubElement(xmlans, 'attach').text = smart_unicode(answer.attach)
         xmlquiz.append(wrong_answer)
 
-        SubElement(xmlquiz, 'manual_difficulty').text = str(quiz.manualdifficulty)
-        SubElement(xmlquiz, 'auto_difficulty').text = str(quiz.autodifficulty)
+        SubElement(xmlquiz, 'manual_difficulty').text = smart_unicode(quiz.manualdifficulty)
+        SubElement(xmlquiz, 'auto_difficulty').text = smart_unicode(quiz.autodifficulty)
 
         tags = Element('tags')
         while len(quiz.tag) > 0:
             tag = quiz.tag.pop(0)
-            SubElement(tags, 'tag').text = str(tag)
+            SubElement(tags, 'tag').text = smart_unicode(tag)
         xmlquiz.append(tags)
 
         xml.append(xmlquiz)
@@ -478,7 +492,7 @@ def QuizGet(request, elementlimit=-1, qid=None):
         if i != -1 and i >= elementlimit:
             break
 
-    return HttpResponse(tostring(xml,encoding='UTF-8'),content_type='text/xml')
+    return HttpResponse(smart_unicode(tostring(xml,encoding='UTF-8')),content_type='text/xml')
 
 def QuizDel(request, qid=None):
     returnmsg = None
