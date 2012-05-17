@@ -44,12 +44,12 @@ urlpatterns = patterns('',
     (r'^quiz/insert/$', UserLoginCheck(QuizInsert)),
     (r'^quiz/edit/$', UserLoginCheck(QuizEdit)),
     (r'^quiz/get/$', UserLoginCheck(QuizGet)),
-    (r'^quiz/get/(?P<qid>[^/]+)/$', UserLoginCheck(QuizGet)),
     (r'^quiz/get/(?P<elementlimit>[0-9]+)/$', UserLoginCheck(QuizGet)),
+    (r'^quiz/get/(?P<qid>[^/]+)/$', UserLoginCheck(QuizGet)),
     (r'quiz/del/$', UserLoginCheck(QuizDel)),
 
     #index
-    (r'', Welcome),
+    #(r'', Welcome),
 
     # Examples:
     # url(r'^$', 'ptl.views.home', name='home'),
