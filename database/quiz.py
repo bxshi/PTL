@@ -97,7 +97,7 @@ class QuizAttach(EmbeddedDocument):
         description
 
     """
-    file            =   BinaryField()
+    file            =   StringField()
     description     =   StringField()
 
 class QuizAnswer(EmbeddedDocument):
@@ -109,7 +109,7 @@ class QuizAnswer(EmbeddedDocument):
 
     """
     answer          =   StringField()
-    attach          =   BinaryField()
+    attach          =   StringField()
 
 class QuizCheckout(EmbeddedDocument):
     """QuizCheckout, embedded in quiz.checkout
