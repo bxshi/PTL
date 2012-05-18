@@ -40,9 +40,9 @@
             </answer>
         </wrong_answer>
 
-        <manual_difficulty>0 to 1, increased by 0.1</manual_difficulty>
+        <manual_difficulty>0.1</manual_difficulty>
 
-        <auto_difficulty>0 to 1, increased by 0.1</auto_difficulty>
+        <auto_difficulty>0.1</auto_difficulty>
 
         <tags>
             <tag>tag1</tag>
