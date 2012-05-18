@@ -37,7 +37,7 @@ class Quiz(Document):
         tag
 
     """
-    creator         =   ReferenceField(User, reverse_delete_rule=CASCADE)
+    creator         =   StringField(max_length=100, required=True)
     info            =   ListField(EmbeddedDocumentField("QuizInfo"))
     description     =   StringField(max_length=100)
     attachment      =   ListField(EmbeddedDocumentField("QuizAttach"))
