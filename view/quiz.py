@@ -350,6 +350,7 @@ def QuizInsert(request, xml=''):
                 try:
                     if info['type'] is not None:
                         quiz.info.append(QuizInfo(type='type', description=info['type']))
+                        quiz.type = int(info['type'])
                 except KeyError:
                     pass
                 try:
@@ -440,6 +441,7 @@ def QuizGet(request, elementlimit=-1, qid=None, type="-1"):
     for quiz in quizset:
         xmlquiz = Element('quiz')
         SubElement(xmlquiz, 'creator').text = smart_unicode(quiz.creator)
+        SubElement(xmlquiz, 'id').text = smart_unicode(str(quiz.id))
 
         quiz_info = Element('quiz_info')
         while len(quiz.info) > 0:
