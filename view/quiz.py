@@ -203,13 +203,14 @@ class QuizParser():
             return None
 
         attachmentelementlist = attachments.findall('attachment')
-        if not attachmentelementlist:
+        if len(attachmentelementlist) > 0:
             while len(attachmentelementlist) > 0:
+                attachmentdict=dict()
                 tmpelement = attachmentelementlist.pop(0)
                 if tmpelement.find('description') is not None:
-                    attachmentdict['description'] = templement.find('description').text
+                    attachmentdict['description'] = tmpelement.find('description').text
                 if tmpelement.find('file') is not None:
-                    attachmentdict['file']  =   templement.find('file').text
+                    attachmentdict['file']  =   tmpelement.find('file').text
                 attachmentlist.append(attachmentdict)
         else:
             return None
@@ -244,8 +245,7 @@ class QuizParser():
                     answerdict['string'] = tmpanswer.find('string').text
                 if tmpanswer.find('attach') is not None:
                     answerdict['attach']= tmpanswer.find('attach').text
-                if len(answerdict) > 0 :
-                    answerlist.append(answerdict)
+                answerlist.append(answerdict)
         else:
             return None
 
@@ -372,9 +372,8 @@ def QuizInsert(request, xml=''):
 
             attch = qp.GetAttachmentList()
             if attch is not None:
-                while len(attch) > 0:
+                for tmpattch in attch:
                     try:
-                        tmpattch = attch.pop(0)
                         quiz.attachment.append(QuizAttach(description=tmpattch['description'], file=tmpattch['file']))
                     except KeyError:
                         pass
@@ -412,7 +411,7 @@ def QuizInsert(request, xml=''):
             returnmsg = 'QUIZ ADD OK id='+ str(quiz.id)
     return HttpResponse(returnmsg)
 
-def QuizGet(request, elementlimit=-1, qid=None):
+def QuizGet(request, elementlimit=-1, qid=None, type="-1"):
     """get quiz
 
         Args:
@@ -434,8 +433,10 @@ def QuizGet(request, elementlimit=-1, qid=None):
     i = 0
     if qid is not None:
         quizset = Quiz.objects(id=qid, creator=username.username)
-    else:
+    elif type == "-1":
         quizset = Quiz.objects(creator=username.username)
+    else:
+        quizset = Quiz.objects(creator=username.username, type=int(type))
     for quiz in quizset:
         xmlquiz = Element('quiz')
         SubElement(xmlquiz, 'creator').text = smart_unicode(quiz.creator)
@@ -453,8 +454,8 @@ def QuizGet(request, elementlimit=-1, qid=None):
         SubElement(xmlquiz, 'description').text = smart_unicode(quiz.description)
 
         attachments = Element('attachments')
-        while len(quiz.attachment) > 0:
-            attach = quiz.attachment.pop(0)
+        SubElement(xmlquiz,"attnum").text = str(len(quiz.attachment))
+        for attach in quiz.attachment:
             xmlatt = Element("attachment")
             SubElement(xmlatt, "description").text = smart_unicode(attach.description)
             SubElement(xmlatt, "file").text = smart_unicode(attach.file)
@@ -462,19 +463,19 @@ def QuizGet(request, elementlimit=-1, qid=None):
         xmlquiz.append(attachments)
 
         correct_answer = Element('correct_answer')
-        while len(quiz.correctanswer) > 0:
-            answer = quiz.correctanswer.pop(0)
+        for answer in quiz.correctanswer:
             xmlans = Element('answer')
             SubElement(xmlans, 'string').text = smart_unicode(answer.answer)
             SubElement(xmlans, 'attach').text = smart_unicode(answer.attach)
+            correct_answer.append(xmlans)
         xmlquiz.append(correct_answer)
 
         wrong_answer = Element('wrong_answer')
-        while len(quiz.wronganswer) > 0:
-            answer = quiz.wronganswer.pop(0)
+        for answer in quiz.wronganswer:
             xmlans = Element('answer')
             SubElement(xmlans, 'string').text = smart_unicode(answer.answer)
             SubElement(xmlans, 'attach').text = smart_unicode(answer.attach)
+            wrong_answer.append(xmlans)
         xmlquiz.append(wrong_answer)
 
         SubElement(xmlquiz, 'manual_difficulty').text = smart_unicode(quiz.manualdifficulty)
@@ -489,7 +490,7 @@ def QuizGet(request, elementlimit=-1, qid=None):
         xml.append(xmlquiz)
 
         i += 1
-        if i != -1 and i >= elementlimit:
+        if elementlimit != -1 and i >= elementlimit:
             break
 
     return HttpResponse(smart_unicode(tostring(xml,encoding='UTF-8')),content_type='text/xml')
