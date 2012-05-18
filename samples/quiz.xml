@@ -5,9 +5,11 @@
         <!-- Optional, non-necessary -->
         <creator>bxshi</creator>
 
+        <id>4fb5e632bcbdef00a8000000</id>
+
         <!-- informations about this quiz -->
         <quiz_info>
-            <type> 单选多选填空判断简答其他 </type>
+            <type>0</type>
             <choose> multiply / single </choose>
             <order> yes / no </order>
             <selection_number> number </selection_number>
